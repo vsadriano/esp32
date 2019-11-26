@@ -10,6 +10,9 @@
 #define SS_PIN_LORA 18
 #define HIGH_GAIN_LORA 20
 
+long informationToSend = 0;
+bool loraInit(void);
+
 bool loraInit(void){
   bool init_status = false;
   
@@ -40,11 +43,15 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("Sending package...");
   LoRa.beginPacket();
-  LoRa.write((unsigned char *)&informacao_a_ser_enviada, sizeof(informacao_a_ser_enviada));
+  LoRa.write((unsigned char *)&informationToSend, sizeof(informationToSend));
   LoRa.endPacket();
 
-  informacao_a_ser_enviada++;
+  Serial.print("Sent value: ");
+  Serial.println(informationToSend);
+
+  informationToSend ++;
 
   delay(1000);
 

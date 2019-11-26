@@ -14,10 +14,10 @@
 
 #define OLED_SDA_PIN 4
 #define OLED_SCL_PIN 15
+#define OLED_RESET 16
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_ADDR 0x3C
-#define OLED_RESET 16
 
 #define OLED_LINE1 0
 #define OLED_LINE2 10
@@ -27,9 +27,11 @@
 #define OLED_LINE6 50
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 16);
+void initDisplay(void);
+bool initLora(void);
 
 void initDisplay(void){
-  if(!display.begin(SSD1306_SWITCHAPVCC, OLED_ADDR)){
+  if(!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)){
     Serial.print("[LoRa Receiver] OLED display initialize failed."); 
   }
   else{
@@ -41,7 +43,7 @@ void initDisplay(void){
   }
 }
 
-bool loraInit(void){
+bool initLora(void){
   bool init_status = false;
   
   Serial.println("[LoRa Sender] Trying start LoRa comunication...");
@@ -63,6 +65,35 @@ bool loraInit(void){
   return init_status;
 }
 
+void onReceive(int packetSize) {
+  String incoming = "";
+  
+  if (packetSize == 0) return;
+  
+  while (LoRa.available()) {
+    incoming += '0' + (char)LoRa.read();
+    
+  }
+
+  display.clearDisplay();
+  display.setCursor(0, OLED_LINE1);
+  display.print("RSSI: ");
+  display.println(LoRa.packetRssi());
+  display.setCursor(0, OLED_LINE2);
+  display.print("SNR: ");
+  display.println(LoRa.packetSnr());
+  display.setCursor(0, OLED_LINE3);
+  display.print("Information: ");
+  display.println(incoming);
+  display.display();
+  
+  Serial.println("Message: " + incoming);
+  Serial.println("RSSI: " + String(LoRa.packetRssi()));
+  Serial.println("Snr: " + String(LoRa.packetSnr()));
+  Serial.println();
+  
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -72,42 +103,16 @@ void setup() {
 
   display.clearDisplay();
   display.setCursor(0, OLED_LINE1);
-  display.print("Wait...");
+  display.println("Katz Viado");
+  display.println("LoRa Receiver");
+  display.print("Waiting for content...");
   display.display();
 
-  while(loraInit() == false);
+  while(initLora() == false);
 
 }
 
 void loop() {
-  char receivedByte;
-  int sizePacket = 0;
-  int loraRssi = 0;
-  long receivedInformation = 0;
-  char * ptReceivedInformation = NULL;
-  if (packet_size == sizeof(informacao_recebida)) 
-    {
-        Serial.print("[LoRa Receiver] Há dados a serem lidos");
-                      
-        ptInformaraoRecebida = (char *)&informacao_recebida;  
-        while (LoRa.available()) 
-        {
-            byte_recebido = (char)LoRa.read();
-            *ptInformaraoRecebida = byte_recebido;
-            ptInformaraoRecebida++;
-        }
-
-        /* Escreve RSSI de recepção e informação recebida */
-        lora_rssi = LoRa.packetRssi();
-        display.clearDisplay();   
-        display.setCursor(0, OLED_LINE1);
-        display.print("RSSI: ");
-        display.println(lora_rssi);
-        display.setCursor(0, OLED_LINE2);
-        display.print("Informacao: ");
-        display.setCursor(0, OLED_LINE3);
-        display.println(informacao_recebida);
-        display.display();      
-    }
+  onReceive(LoRa.parsePacket());
 
 }
