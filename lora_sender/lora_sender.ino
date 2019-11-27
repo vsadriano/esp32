@@ -10,7 +10,7 @@
 #define SS_PIN_LORA 18
 #define HIGH_GAIN_LORA 20
 
-long informationToSend = 0;
+char informationToSend = 0;
 bool loraInit(void);
 
 bool loraInit(void){

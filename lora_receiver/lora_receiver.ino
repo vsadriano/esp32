@@ -69,12 +69,11 @@ void onReceive(int packetSize) {
   String incoming = "";
   
   if (packetSize == 0) return;
-  
+
   while (LoRa.available()) {
     incoming += '0' + (char)LoRa.read();
-    
   }
-
+  
   display.clearDisplay();
   display.setCursor(0, OLED_LINE1);
   display.print("RSSI: ");
