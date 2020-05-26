@@ -27,7 +27,9 @@ Frente ao movimento de descontinuidade, foi editado e versionado esse script, de
 Para iniciar o instalador, executar o comando:
 
 ```shell
-MACHINE=$PLATAFORMA curl -sL https://github.com/vsadriano/esp32/hassio/install.sh | bash -s
+curl -sL -o install.sh  https://raw.githubusercontent.com/vsadriano/esp32/master/hassio/install.sh
+
+MACHINE=$PLATAFORMA sh install.sh
 ```
 
 > Para dar continuidade ao processo, digitar "not supported", frente à mensagem de warning.
